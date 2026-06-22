@@ -1,32 +1,20 @@
 import streamlit as st
 import google.generativeai as genai
 from PyPDF2 import PdfReader
+
+# Configure Gemini API from Streamlit Secrets
+genai.configure(
+    api_key=st.secrets["GEMINI_API_KEY"]
+)
+
+# Gemini Model
+model = genai.GenerativeModel("gemini-1.5-flash")
+
+# Sidebar Navigation
 page = st.sidebar.selectbox(
     "Choose Page",
     ["Home", "Resume Analyzer", "Career Roadmap", "Interview Practice"]
 )
-# Paste your Gemini API key here
-
-genai.configure(api_key="YOUR_API_KEY_HERE")
-model = genai.GenerativeModel("gemini-2.5-flash")
-
-
-
-if page == "Home":
-
-    st.title("🚀 CareerForge AI")
-
-    st.subheader("Your Personal AI Career Mentor")
-
-    st.write("""
-    Welcome to CareerForge AI.
-
-    Features:
-    - Resume Analysis
-    - Career Roadmap
-    - Interview Practice
-    - Skill Development
-    """)
 elif page == "Resume Analyzer":
 
     st.title("📄 AI Resume Analyzer")
@@ -42,8 +30,8 @@ elif page == "Resume Analyzer":
 
         resume_text = ""
 
-        for page in reader.pages:
-            text = page.extract_text()
+        for pdf_page in reader.pages:
+            text = pdf_page.extract_text()
 
             if text:
                 resume_text += text
@@ -52,27 +40,32 @@ elif page == "Resume Analyzer":
 
         if st.button("Analyze Resume"):
 
-            prompt = f"""
-            Analyze this resume.
+            try:
 
-            Give:
-            1. ATS Score out of 100
-            2. Skills Found
-            3. Strengths
-            4. Weaknesses
-            5. Missing Skills
-            6. Suggestions for Improvement
-            7. 5 Interview Questions
+                prompt = f"""
+                Analyze this resume.
 
-            Resume:
-            {resume_text}
-            """
+                Give:
+                1. ATS Score out of 100
+                2. Skills Found
+                3. Strengths
+                4. Weaknesses
+                5. Missing Skills
+                6. Suggestions for Improvement
+                7. 5 Interview Questions
 
-            response = model.generate_content(prompt)
+                Resume:
+                {resume_text}
+                """
 
-            st.subheader("Analysis Result")
-            st.write(response.text)
-elif page == "Career Roadmap":
+                response = model.generate_content(prompt)
+
+                st.subheader("Analysis Result")
+                st.write(response.text)
+
+            except Exception as e:
+                st.error(f"Error: {e}")
+                elif page == "Career Roadmap":
 
     st.title("🗺️ Career Roadmap")
 
@@ -82,27 +75,29 @@ elif page == "Career Roadmap":
 
     if st.button("Generate Roadmap"):
 
-        prompt = f"""
-        Create a detailed 6-month roadmap
-        for becoming a {role}.
+        try:
 
-        Include:
-        1. Skills to learn
-        2. Courses
-        3. Projects
-        4. Interview preparation
+            prompt = f"""
+            Create a detailed 6-month roadmap
+            for becoming a {role}.
 
-        Give month-wise plan.
-        """
+            Include:
+            1. Skills to learn
+            2. Courses
+            3. Projects
+            4. Interview preparation
 
-        response = model.generate_content(prompt)
+            Give month-wise plan.
+            """
 
-        st.subheader("Your Career Roadmap")
+            response = model.generate_content(prompt)
 
-        st.write(response.text)
+            st.subheader("Your Career Roadmap")
+            st.write(response.text)
 
-
-elif page == "Interview Practice":
+        except Exception as e:
+            st.error(f"Error: {e}")
+            elif page == "Interview Practice":
 
     st.title("🎤 Interview Practice")
 
@@ -112,19 +107,23 @@ elif page == "Interview Practice":
 
     if st.button("Generate Interview Questions"):
 
-        prompt = f"""
-        Generate 10 interview questions for a {interview_role}.
+        try:
 
-        Include:
-        - Technical Questions
-        - HR Questions
-        - Scenario Based Questions
+            prompt = f"""
+            Generate 10 interview questions for a {interview_role}.
 
-        Number them properly.
-        """
+            Include:
+            - Technical Questions
+            - HR Questions
+            - Scenario Based Questions
 
-        response = model.generate_content(prompt)
+            Number them properly.
+            """
 
-        st.subheader("Interview Questions")
+            response = model.generate_content(prompt)
 
-        st.write(response.text)
+            st.subheader("Interview Questions")
+            st.write(response.text)
+
+        except Exception as e:
+            st.error(f"Error: {e}")
